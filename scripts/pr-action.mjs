@@ -42,7 +42,8 @@ function parsePullUrl(value) {
   return {
     number,
     repo: `${parts[0]}/${parts[1]}`,
-    url: `https://github.com/${parts.join('/')}`,
+    // Drop tab suffixes (/files, /commits) so comments and logs use the PR itself.
+    url: `https://github.com/${parts[0]}/${parts[1]}/pull/${number}`,
   }
 }
 

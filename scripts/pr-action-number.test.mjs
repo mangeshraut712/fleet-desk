@@ -48,3 +48,16 @@ test('still rejects a scientific number even with a trailing path', () => {
   assert.match(result.stderr, /Expected https:\/\/github.com\//)
   assert.equal(result.stdout, '')
 })
+
+test('close-as-dupe comments use a canonical winning URL, not /files', () => {
+  const result = run(
+    'close-as-dupe',
+    'https://github.com/example/project/pull/8/commits',
+    'https://www.github.com/example/project/pull/12/files',
+  )
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /Closing as a duplicate of https:\/\/github.com\/example\/project\/pull\/12\./)
+  assert.doesNotMatch(result.stdout, /\/files/)
+  assert.doesNotMatch(result.stdout, /\/commits/)
+  assert.doesNotMatch(result.stdout, /www\.github\.com/)
+})

@@ -26,6 +26,9 @@ function parsePullUrl(value) {
     url.protocol !== 'https:' ||
     url.hostname !== 'github.com' ||
     parts.length !== 4 ||
+    // URL.pathname preserves escapes, but gh may decode them as repository aliases.
+    parts[0].includes('%') ||
+    parts[1].includes('%') ||
     parts[2] !== 'pull' ||
     !Number.isSafeInteger(number) ||
     number < 1
@@ -63,6 +66,9 @@ try {
   } else if (action === 'close-as-dupe' && urls.length === 2) {
     const duplicate = parsePullUrl(urls[0])
     const winner = parsePullUrl(urls[1])
+    if (duplicate.repo.toLowerCase() === winner.repo.toLowerCase() && duplicate.number === winner.number) {
+      throw new Error('A pull request cannot be its own duplicate.')
+    }
     const comment = `Closing as a duplicate of ${winner.url}.`
     commands = [
       ['Comment on duplicate', ['pr', 'comment', String(duplicate.number), '--repo', duplicate.repo, '--body', comment]],

@@ -26,10 +26,12 @@ function parsePullUrl(value) {
     throw new Error(`Expected https://github.com/<owner>/<repo>/pull/<number>, received: ${value}`)
   }
   const number = Number(parts[3])
+  const host = url.hostname.replace(/^www\./, '')
+  // Browser copies often include a tab path (/files, /commits, /checks) or www.
   if (
     url.protocol !== 'https:' ||
-    url.hostname !== 'github.com' ||
-    parts.length !== 4 ||
+    host !== 'github.com' ||
+    parts.length < 4 ||
     parts[2] !== 'pull' ||
     !Number.isSafeInteger(number) ||
     number < 1

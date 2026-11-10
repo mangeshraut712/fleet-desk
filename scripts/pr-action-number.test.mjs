@@ -27,3 +27,24 @@ for (const bad of ['12e2', '0x10', '12.0', '+12', '12abc']) {
     assert.equal(result.stdout, '')
   })
 }
+
+for (const suffix of ['files', 'commits', 'checks']) {
+  test(`accepts a pull URL with trailing /${suffix} path`, () => {
+    const result = run('update-branch', `https://github.com/example/project/pull/12/${suffix}`)
+    assert.equal(result.status, 0)
+    assert.match(result.stdout, /gh pr update-branch 12 --repo example\/project/)
+  })
+}
+
+test('accepts a www.github.com pull URL', () => {
+  const result = run('update-branch', 'https://www.github.com/example/project/pull/12')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /gh pr update-branch 12 --repo example\/project/)
+})
+
+test('still rejects a scientific number even with a trailing path', () => {
+  const result = run('update-branch', 'https://github.com/example/project/pull/12e2/files')
+  assert.equal(result.status, 1)
+  assert.match(result.stderr, /Expected https:\/\/github.com\//)
+  assert.equal(result.stdout, '')
+})

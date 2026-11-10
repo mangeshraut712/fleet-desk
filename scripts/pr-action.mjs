@@ -21,6 +21,10 @@ function parsePullUrl(value) {
   }
 
   const parts = url.pathname.split('/').filter(Boolean)
+  // Number("12e2") is 1200 and Number("0x10") is 16; only accept a digit string.
+  if (!/^\d+$/.test(parts[3] || '')) {
+    throw new Error(`Expected https://github.com/<owner>/<repo>/pull/<number>, received: ${value}`)
+  }
   const number = Number(parts[3])
   if (
     url.protocol !== 'https:' ||

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { isWinningPullUrl } from './pull-url.ts'
 
 type MergeState = 'BEHIND' | 'BLOCKED' | 'CLEAN' | 'UNSTABLE' | 'DIRTY' | 'UNKNOWN' | 'HAS_HOOKS'
 type Mergeable = boolean | 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN' | null
@@ -97,7 +98,7 @@ function App() {
   const visible = useMemo(() => activeFilters.length === 0 ? prs : prs.filter((pr) => activeFilters.some((id) => filters.find((filter) => filter.id === id)?.matches(pr))), [activeFilters, prs])
   const counts = useMemo(() => Object.fromEntries(filters.map((filter) => [filter.id, prs.filter(filter.matches).length])) as Record<FilterId, number>, [prs])
   const command = pending ? commandFor(pending, winningUrl.trim(), !dryRun) : ''
-  const duplicateUrlValid = /^https:\/\/github\.com\/.+\/pull\/\d+\/?$/i.test(winningUrl.trim())
+  const duplicateUrlValid = isWinningPullUrl(winningUrl)
 
   function chooseMode(next: SourceMode) { setMode(next); if (next === 'fixture') setDryRun(true) }
   function toggleFilter(id: FilterId) { setActiveFilters((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]) }

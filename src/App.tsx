@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { shouldSkipPullRequest } from './config.ts'
 import { isWinningPullUrl } from './pull-url.ts'
 
 type MergeState = 'BEHIND' | 'BLOCKED' | 'CLEAN' | 'UNSTABLE' | 'DIRTY' | 'UNKNOWN' | 'HAS_HOOKS'
@@ -78,7 +79,7 @@ function App() {
         const payload: unknown = await response.json()
         const rows = Array.isArray(payload) ? payload : payload && typeof payload === 'object' && Array.isArray((payload as { prs?: unknown }).prs) ? (payload as { prs: unknown[] }).prs : []
         if (!rows.every(isPullRequest)) throw new Error('The PR data did not have the expected shape.')
-        setPrs(rows); setLastRefresh(new Date().toISOString())
+        setPrs(rows.filter((pr) => !shouldSkipPullRequest(pr))); setLastRefresh(new Date().toISOString())
       } catch (reason) {
         if (controller.signal.aborted) return
         setPrs([])

@@ -9,6 +9,7 @@ import { execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { shouldSkipPullRequest } from '../src/skip-pr.js'
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const defaultOutput = resolve(scriptDirectory, '../public/fixtures/live-prs.json')
@@ -130,7 +131,9 @@ export function collectPulls(runGraphql, author) {
       const key = pr.url || `${pr.repository?.nameWithOwner}#${pr.number}`
       if (seen.has(key)) continue
       seen.add(key)
-      prs.push(mapPull(pr, author))
+      const mapped = mapPull(pr, author)
+      if (shouldSkipPullRequest(mapped)) continue
+      prs.push(mapped)
     }
     if (!search.pageInfo?.hasNextPage || !search.pageInfo.endCursor) break
     cursor = search.pageInfo.endCursor

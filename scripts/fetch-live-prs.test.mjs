@@ -64,3 +64,14 @@ test('run writes every page to the fixture file', () => {
   const written = JSON.parse(readFileSync(output, 'utf8'))
   assert.deepEqual(written.map((item) => item.number), [1, 2, 3])
 })
+
+test('collectPulls drops a collaborator-blocked OpenAI CreatePR and a pyrefly vanity stub', () => {
+  const blocked = pr(7, 'openai/codex')
+  blocked.title = 'CreatePR: add a collaborator-only workflow'
+  blocked.labels = { nodes: [{ name: 'collaborator-blocked' }] }
+  const vanity = pr(8, 'facebook/pyrefly')
+  vanity.title = 'add a fixture-stub for the vanity demo'
+  const kept = pr(9, 'microsoft/vscode')
+  const prs = collectPulls(() => page([blocked, vanity, kept], false, null), 'mangeshraut712')
+  assert.deepEqual(prs.map((item) => item.number), [9])
+})

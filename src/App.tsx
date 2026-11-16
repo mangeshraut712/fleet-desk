@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
+import { shouldSkipPullRequest } from './config.ts'
+import { isWinningPullUrl } from './pull-url.ts'
 
 type MergeState = 'BEHIND' | 'BLOCKED' | 'CLEAN' | 'UNSTABLE' | 'DIRTY' | 'UNKNOWN' | 'HAS_HOOKS'
 type Mergeable = boolean | 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN' | null
@@ -77,7 +79,7 @@ function App() {
         const payload: unknown = await response.json()
         const rows = Array.isArray(payload) ? payload : payload && typeof payload === 'object' && Array.isArray((payload as { prs?: unknown }).prs) ? (payload as { prs: unknown[] }).prs : []
         if (!rows.every(isPullRequest)) throw new Error('The PR data did not have the expected shape.')
-        setPrs(rows); setLastRefresh(new Date().toISOString())
+        setPrs(rows.filter((pr) => !shouldSkipPullRequest(pr))); setLastRefresh(new Date().toISOString())
       } catch (reason) {
         if (controller.signal.aborted) return
         setPrs([])
@@ -97,7 +99,7 @@ function App() {
   const visible = useMemo(() => activeFilters.length === 0 ? prs : prs.filter((pr) => activeFilters.some((id) => filters.find((filter) => filter.id === id)?.matches(pr))), [activeFilters, prs])
   const counts = useMemo(() => Object.fromEntries(filters.map((filter) => [filter.id, prs.filter(filter.matches).length])) as Record<FilterId, number>, [prs])
   const command = pending ? commandFor(pending, winningUrl.trim(), !dryRun) : ''
-  const duplicateUrlValid = /^https:\/\/github\.com\/.+\/pull\/\d+\/?$/i.test(winningUrl.trim())
+  const duplicateUrlValid = isWinningPullUrl(winningUrl)
 
   function chooseMode(next: SourceMode) { setMode(next); if (next === 'fixture') setDryRun(true) }
   function toggleFilter(id: FilterId) { setActiveFilters((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]) }

@@ -21,11 +21,17 @@ function parsePullUrl(value) {
   }
 
   const parts = url.pathname.split('/').filter(Boolean)
+  // Number("12e2") is 1200 and Number("0x10") is 16; only accept a digit string.
+  if (!/^\d+$/.test(parts[3] || '')) {
+    throw new Error(`Expected https://github.com/<owner>/<repo>/pull/<number>, received: ${value}`)
+  }
   const number = Number(parts[3])
+  const host = url.hostname.replace(/^www\./, '')
+  // Browser copies often include a tab path (/files, /commits, /checks) or www.
   if (
     url.protocol !== 'https:' ||
-    url.hostname !== 'github.com' ||
-    parts.length !== 4 ||
+    host !== 'github.com' ||
+    parts.length < 4 ||
     // URL.pathname preserves escapes, but gh may decode them as repository aliases.
     parts[0].includes('%') ||
     parts[1].includes('%') ||
@@ -39,7 +45,8 @@ function parsePullUrl(value) {
   return {
     number,
     repo: `${parts[0]}/${parts[1]}`,
-    url: `https://github.com/${parts.join('/')}`,
+    // Drop tab suffixes (/files, /commits) so comments and logs use the PR itself.
+    url: `https://github.com/${parts[0]}/${parts[1]}/pull/${number}`,
   }
 }
 

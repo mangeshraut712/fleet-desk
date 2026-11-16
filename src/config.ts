@@ -24,11 +24,7 @@ export const fleetDeskConfig = {
   },
 } as const;
 
-export type SkipCandidate = {
-  repo: string;
-  title: string;
-  labels: string[];
-};
+export { shouldSkipPullRequest } from "./skip-pr.js";
 
 const allAllowedSlugs: readonly string[] = fleetDeskConfig.organizationAllowlist.flatMap(
   ({ slugs }) => slugs,
@@ -37,32 +33,4 @@ const allAllowedSlugs: readonly string[] = fleetDeskConfig.organizationAllowlist
 export function isAllowlistedRepo(repo: string): boolean {
   const organization = repo.split("/")[0]?.toLowerCase();
   return Boolean(organization && allAllowedSlugs.includes(organization));
-}
-
-/** Deliberate exclusions; do not offer actions for these PRs. */
-export function shouldSkipPullRequest(pr: SkipCandidate): boolean {
-  const repo = pr.repo.toLowerCase();
-  const title = pr.title.toLowerCase();
-  const labels = pr.labels.map((label) => label.toLowerCase());
-  const hasLabel = (label: string) => labels.includes(label);
-
-  const isOpenAiCreatePr =
-    repo.startsWith("openai/") && /create\s*-?\s*pr/.test(title);
-  if (
-    fleetDeskConfig.skipRules.openaiCreatePrWhenCollaboratorBlocked &&
-    isOpenAiCreatePr &&
-    hasLabel("collaborator-blocked")
-  ) {
-    return true;
-  }
-
-  const isPyrefly = repo.endsWith("/pyrefly");
-  const isFixtureStub = title.includes("fixture-stub") || hasLabel("fixture-stub");
-  const isVanity = title.includes("vanity") || hasLabel("vanity");
-  return (
-    fleetDeskConfig.skipRules.pyreflyFixtureStubVanityPrs &&
-    isPyrefly &&
-    isFixtureStub &&
-    isVanity
-  );
 }

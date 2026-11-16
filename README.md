@@ -57,7 +57,10 @@ npm run pr:action -- close-as-dupe https://github.com/OWNER/REPO/pull/123 https:
 Review the printed commands first. Add `--execute` to the selected command only
 when you intend to mutate GitHub and have the necessary permission. A duplicate
 action comments with the winning PR URL before it closes the duplicate. The
-bridge never force-pushes or deletes a branch.
+bridge rejects a PR used as its own duplicate and URLs with percent-encoded
+owner or repository names. It never force-pushes or deletes a branch.
+
+Run the offline action-bridge regression tests with `node --test scripts/pr-action.test.mjs`.
 
 ## Configuration
 

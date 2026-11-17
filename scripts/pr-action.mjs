@@ -7,7 +7,21 @@
 import { execFileSync } from 'node:child_process'
 
 function usage(exitCode = 0) {
-  process.stderr.write(`Usage:\n  npm run pr:action -- update-branch <pr-url> [--execute]\n  npm run pr:action -- view <pr-url> [--execute]\n  npm run pr:action -- diff <pr-url> [--execute]\n  npm run pr:action -- checks <pr-url> [--execute]\n  npm run pr:action -- checkout <pr-url> [--execute]\n  npm run pr:action -- ready <pr-url> [--execute]\n  npm run pr:action -- close <pr-url> [--execute]\n  npm run pr:action -- reopen <pr-url> [--execute]\n  npm run pr:action -- lock <pr-url> [--execute]\n  npm run pr:action -- unlock <pr-url> [--execute]\n  npm run pr:action -- comment <pr-url> "<comment-body>" [--execute]\n  npm run pr:action -- close-as-dupe <duplicate-pr-url> <winning-pr-url> [--execute]\n`)
+  process.stderr.write(`Usage:
+  npm run pr:action -- update-branch <pr-url> [--execute]
+  npm run pr:action -- view <pr-url> [--execute]
+  npm run pr:action -- diff <pr-url> [--execute]
+  npm run pr:action -- checks <pr-url> [--execute]
+  npm run pr:action -- checkout <pr-url> [--execute]
+  npm run pr:action -- ready <pr-url> [--execute]
+  npm run pr:action -- close <pr-url> [--execute]
+  npm run pr:action -- reopen <pr-url> [--execute]
+  npm run pr:action -- merge <pr-url> [--execute]
+  npm run pr:action -- lock <pr-url> [--execute]
+  npm run pr:action -- unlock <pr-url> [--execute]
+  npm run pr:action -- comment <pr-url> "<comment-body>" [--execute]
+  npm run pr:action -- close-as-dupe <duplicate-pr-url> <winning-pr-url> [--execute]
+`)
   process.exit(exitCode)
 }
 
@@ -111,6 +125,12 @@ try {
     commands = [[
       'Reopen pull request',
       ['pr', 'reopen', String(pr.number), '--repo', pr.repo],
+    ]]
+  } else if (action === 'merge' && urls.length === 1) {
+    const pr = parsePullUrl(urls[0])
+    commands = [[
+      'Merge pull request',
+      ['pr', 'merge', String(pr.number), '--repo', pr.repo],
     ]]
   } else if (action === 'lock' && urls.length === 1) {
     const pr = parsePullUrl(urls[0])

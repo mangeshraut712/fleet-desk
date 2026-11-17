@@ -11,6 +11,9 @@ test('isAllowlistedRepo identifies allowlisted company slugs', () => {
   assert.equal(isAllowlistedRepo('microsoft/vscode'), true)
   assert.equal(isAllowlistedRepo('spacex/launch'), true)
   assert.equal(isAllowlistedRepo('xai-org/grok'), true)
+  assert.equal(isAllowlistedRepo('salesforce/zana'), true)
+  assert.equal(isAllowlistedRepo('google/adk-go'), true)
+  assert.equal(isAllowlistedRepo('google-gemini/cookbook'), true)
 })
 
 test('isAllowlistedRepo handles casing and whitespace', () => {
@@ -32,6 +35,9 @@ test('getOrganizationForRepo returns canonical organization name', () => {
   assert.equal(getOrganizationForRepo('awslabs/stickler'), 'Amazon / AWS')
   assert.equal(getOrganizationForRepo('spacex/api'), 'SpaceX / xAI')
   assert.equal(getOrganizationForRepo('xai-org/prompt'), 'SpaceX / xAI')
+  assert.equal(getOrganizationForRepo('salesforce/zana'), 'Salesforce')
+  assert.equal(getOrganizationForRepo('google/adk-go'), 'Google')
+  assert.equal(getOrganizationForRepo('google-gemini/cookbook'), 'Google')
   assert.equal(getOrganizationForRepo('unknown/project'), null)
   assert.equal(getOrganizationForRepo(null), null)
   assert.equal(getOrganizationForRepo(''), null)

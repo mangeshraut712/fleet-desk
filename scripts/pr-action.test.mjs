@@ -103,6 +103,13 @@ test('preserves unlock pull request dry runs', () => {
   assert.match(result.stdout, /gh pr unlock 12 --repo example\/project/)
 })
 
+test('preserves comment pull request dry runs', () => {
+  const result = run('comment', 'https://github.com/example/project/pull/12', 'LGTM! Great work.')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.match(result.stdout, /gh pr comment 12 --repo example\/project --body "LGTM! Great work\."/)
+})
+
 test('rejects self-duplicate before execution with gh unavailable', () => {
   const result = run('close-as-dupe', 'https://github.com/example/project/pull/12',
     'https://github.com/EXAMPLE/PROJECT/pull/12', '--execute')

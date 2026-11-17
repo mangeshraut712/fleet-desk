@@ -89,6 +89,20 @@ test('preserves reopen pull request dry runs', () => {
   assert.match(result.stdout, /gh pr reopen 12 --repo example\/project/)
 })
 
+test('preserves lock pull request dry runs', () => {
+  const result = run('lock', 'https://github.com/example/project/pull/12')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.match(result.stdout, /gh pr lock 12 --repo example\/project/)
+})
+
+test('preserves unlock pull request dry runs', () => {
+  const result = run('unlock', 'https://github.com/example/project/pull/12')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.match(result.stdout, /gh pr unlock 12 --repo example\/project/)
+})
+
 test('rejects self-duplicate before execution with gh unavailable', () => {
   const result = run('close-as-dupe', 'https://github.com/example/project/pull/12',
     'https://github.com/EXAMPLE/PROJECT/pull/12', '--execute')

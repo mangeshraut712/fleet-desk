@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "fetch:live": "node scripts/fetch-live-prs.mjs",
-    "pr:action": "node scripts/pr-action.mjs"
+    "pr:action": "node scripts/pr-action.mjs",
+    "test": "node --test src/*.test.mts scripts/*.test.mjs"
   },
   "dependencies": {
     "react": "^19.3.1",

@@ -7,7 +7,7 @@
 import { execFileSync } from 'node:child_process'
 
 function usage(exitCode = 0) {
-  process.stderr.write(`Usage:\n  npm run pr:action -- update-branch <pr-url> [--execute]\n  npm run pr:action -- view <pr-url> [--execute]\n  npm run pr:action -- diff <pr-url> [--execute]\n  npm run pr:action -- checks <pr-url> [--execute]\n  npm run pr:action -- checkout <pr-url> [--execute]\n  npm run pr:action -- ready <pr-url> [--execute]\n  npm run pr:action -- reopen <pr-url> [--execute]\n  npm run pr:action -- close-as-dupe <duplicate-pr-url> <winning-pr-url> [--execute]\n`)
+  process.stderr.write(`Usage:\n  npm run pr:action -- update-branch <pr-url> [--execute]\n  npm run pr:action -- view <pr-url> [--execute]\n  npm run pr:action -- diff <pr-url> [--execute]\n  npm run pr:action -- checks <pr-url> [--execute]\n  npm run pr:action -- checkout <pr-url> [--execute]\n  npm run pr:action -- ready <pr-url> [--execute]\n  npm run pr:action -- close <pr-url> [--execute]\n  npm run pr:action -- reopen <pr-url> [--execute]\n  npm run pr:action -- close-as-dupe <duplicate-pr-url> <winning-pr-url> [--execute]\n`)
   process.exit(exitCode)
 }
 
@@ -99,6 +99,12 @@ try {
     commands = [[
       'Mark pull request ready for review',
       ['pr', 'ready', String(pr.number), '--repo', pr.repo],
+    ]]
+  } else if (action === 'close' && urls.length === 1) {
+    const pr = parsePullUrl(urls[0])
+    commands = [[
+      'Close pull request',
+      ['pr', 'close', String(pr.number), '--repo', pr.repo],
     ]]
   } else if (action === 'reopen' && urls.length === 1) {
     const pr = parsePullUrl(urls[0])

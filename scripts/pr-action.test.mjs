@@ -47,6 +47,20 @@ test('preserves view pull request dry runs', () => {
   assert.match(result.stdout, /gh pr view 12 --repo example\/project/)
 })
 
+test('preserves browse pull request dry runs', () => {
+  const result = run('browse', 'https://github.com/example/project/pull/12')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.match(result.stdout, /gh pr view 12 --repo example\/project --web/)
+})
+
+test('preserves web pull request alias dry runs', () => {
+  const result = run('web', 'https://github.com/example/project/pull/12')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.match(result.stdout, /gh pr view 12 --repo example\/project --web/)
+})
+
 test('preserves status pull request dry runs', () => {
   const result = run('status', 'https://github.com/example/project/pull/12')
   assert.equal(result.status, 0)

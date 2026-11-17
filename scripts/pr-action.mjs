@@ -7,7 +7,7 @@
 import { execFileSync } from 'node:child_process'
 
 function usage(exitCode = 0) {
-  process.stderr.write(`Usage:\n  npm run pr:action -- update-branch <pr-url> [--execute]\n  npm run pr:action -- view <pr-url> [--execute]\n  npm run pr:action -- diff <pr-url> [--execute]\n  npm run pr:action -- checks <pr-url> [--execute]\n  npm run pr:action -- close-as-dupe <duplicate-pr-url> <winning-pr-url> [--execute]\n`)
+  process.stderr.write(`Usage:\n  npm run pr:action -- update-branch <pr-url> [--execute]\n  npm run pr:action -- view <pr-url> [--execute]\n  npm run pr:action -- diff <pr-url> [--execute]\n  npm run pr:action -- checks <pr-url> [--execute]\n  npm run pr:action -- checkout <pr-url> [--execute]\n  npm run pr:action -- ready <pr-url> [--execute]\n  npm run pr:action -- close-as-dupe <duplicate-pr-url> <winning-pr-url> [--execute]\n`)
   process.exit(exitCode)
 }
 
@@ -87,6 +87,18 @@ try {
     commands = [[
       'View pull request checks',
       ['pr', 'checks', String(pr.number), '--repo', pr.repo],
+    ]]
+  } else if (action === 'checkout' && urls.length === 1) {
+    const pr = parsePullUrl(urls[0])
+    commands = [[
+      'Checkout pull request',
+      ['pr', 'checkout', String(pr.number), '--repo', pr.repo],
+    ]]
+  } else if (action === 'ready' && urls.length === 1) {
+    const pr = parsePullUrl(urls[0])
+    commands = [[
+      'Mark pull request ready for review',
+      ['pr', 'ready', String(pr.number), '--repo', pr.repo],
     ]]
   } else if (action === 'close-as-dupe' && urls.length === 2) {
     const duplicate = parsePullUrl(urls[0])

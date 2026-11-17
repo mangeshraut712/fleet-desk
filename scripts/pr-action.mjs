@@ -10,6 +10,7 @@ function usage(exitCode = 0) {
   process.stderr.write(`Usage:
   npm run pr:action -- update-branch <pr-url> [--execute]
   npm run pr:action -- view <pr-url> [--execute]
+  npm run pr:action -- browse <pr-url> [--execute]
   npm run pr:action -- status <pr-url> [--execute]
   npm run pr:action -- diff <pr-url> [--execute]
   npm run pr:action -- checks <pr-url> [--execute]
@@ -90,6 +91,12 @@ try {
     commands = [[
       'View pull request',
       ['pr', 'view', String(pr.number), '--repo', pr.repo],
+    ]]
+  } else if ((action === 'browse' || action === 'web') && urls.length === 1) {
+    const pr = parsePullUrl(urls[0])
+    commands = [[
+      'Open pull request in browser',
+      ['pr', 'view', String(pr.number), '--repo', pr.repo, '--web'],
     ]]
   } else if (action === 'status' && urls.length === 1) {
     const pr = parsePullUrl(urls[0])

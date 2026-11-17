@@ -41,3 +41,12 @@ test("keeps an unrelated PR", () => {
     false,
   )
 })
+
+test("handles null, undefined, non-object, and missing labels gracefully", () => {
+  assert.equal(shouldSkipPullRequest(null), false)
+  assert.equal(shouldSkipPullRequest(undefined), false)
+  assert.equal(shouldSkipPullRequest("not-a-pr" as any), false)
+  assert.equal(shouldSkipPullRequest({ repo: "openai/codex", title: "CreatePR", labels: null as any }), false)
+  assert.equal(shouldSkipPullRequest({ repo: "openai/codex", title: "CreatePR", labels: undefined as any }), false)
+  assert.equal(shouldSkipPullRequest({ repo: "openai/codex", title: "CreatePR", labels: "string-label" as any }), false)
+})

@@ -30,6 +30,9 @@ for (const bad of [
   'https://github.com/example/project/pull/0x10',
   'https://github.com/example/project/issues/12',
   'http://github.com/example/project/pull/12',
+  'https://github.com/%65xample/project/pull/12',
+  'https://github.com/example/%70roject/pull/12',
+  'https://github.com/example/%2570roject/pull/12',
   'not a url',
 ]) {
   test(`rejects ${bad}`, () => {

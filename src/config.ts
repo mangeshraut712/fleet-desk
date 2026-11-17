@@ -30,7 +30,18 @@ const allAllowedSlugs: readonly string[] = fleetDeskConfig.organizationAllowlist
   ({ slugs }) => slugs,
 );
 
-export function isAllowlistedRepo(repo: string): boolean {
-  const organization = repo.split("/")[0]?.toLowerCase();
+export function isAllowlistedRepo(repo?: string | null): boolean {
+  if (!repo) return false;
+  const organization = repo.trim().split("/")[0]?.toLowerCase();
   return Boolean(organization && allAllowedSlugs.includes(organization));
+}
+
+export function getOrganizationForRepo(repo?: string | null): string | null {
+  if (!repo) return null;
+  const organization = repo.trim().split("/")[0]?.toLowerCase();
+  if (!organization) return null;
+  const match = fleetDeskConfig.organizationAllowlist.find(({ slugs }) =>
+    (slugs as readonly string[]).includes(organization),
+  );
+  return match?.name ?? null;
 }

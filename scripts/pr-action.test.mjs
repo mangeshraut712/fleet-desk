@@ -89,6 +89,13 @@ test('preserves reopen pull request dry runs', () => {
   assert.match(result.stdout, /gh pr reopen 12 --repo example\/project/)
 })
 
+test('preserves merge pull request dry runs', () => {
+  const result = run('merge', 'https://github.com/example/project/pull/12')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.match(result.stdout, /gh pr merge 12 --repo example\/project/)
+})
+
 test('preserves lock pull request dry runs', () => {
   const result = run('lock', 'https://github.com/example/project/pull/12')
   assert.equal(result.status, 0)

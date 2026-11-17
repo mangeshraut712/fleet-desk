@@ -47,6 +47,20 @@ test('preserves view pull request dry runs', () => {
   assert.match(result.stdout, /gh pr view 12 --repo example\/project/)
 })
 
+test('preserves diff pull request dry runs', () => {
+  const result = run('diff', 'https://github.com/example/project/pull/12')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.match(result.stdout, /gh pr diff 12 --repo example\/project/)
+})
+
+test('preserves checks pull request dry runs', () => {
+  const result = run('checks', 'https://github.com/example/project/pull/12')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.match(result.stdout, /gh pr checks 12 --repo example\/project/)
+})
+
 test('rejects self-duplicate before execution with gh unavailable', () => {
   const result = run('close-as-dupe', 'https://github.com/example/project/pull/12',
     'https://github.com/EXAMPLE/PROJECT/pull/12', '--execute')

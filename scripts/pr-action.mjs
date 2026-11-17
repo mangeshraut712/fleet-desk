@@ -11,6 +11,8 @@ function usage(exitCode = 0) {
   npm run pr:action -- update-branch <pr-url> [--execute]
   npm run pr:action -- view <pr-url> [--execute]
   npm run pr:action -- browse <pr-url> [--execute]
+  npm run pr:action -- files <pr-url> [--execute]
+  npm run pr:action -- review <pr-url> [--execute]
   npm run pr:action -- status <pr-url> [--execute]
   npm run pr:action -- diff <pr-url> [--execute]
   npm run pr:action -- checks <pr-url> [--execute]
@@ -97,6 +99,18 @@ try {
     commands = [[
       'Open pull request in browser',
       ['pr', 'view', String(pr.number), '--repo', pr.repo, '--web'],
+    ]]
+  } else if (action === 'files' && urls.length === 1) {
+    const pr = parsePullUrl(urls[0])
+    commands = [[
+      'View pull request changed files',
+      ['pr', 'diff', String(pr.number), '--repo', pr.repo, '--name-only'],
+    ]]
+  } else if (action === 'review' && urls.length === 1) {
+    const pr = parsePullUrl(urls[0])
+    commands = [[
+      'Check pull request reviews',
+      ['pr', 'view', String(pr.number), '--repo', pr.repo, '--json', 'reviews,latestReviews'],
     ]]
   } else if (action === 'status' && urls.length === 1) {
     const pr = parsePullUrl(urls[0])

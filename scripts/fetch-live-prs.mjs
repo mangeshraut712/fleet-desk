@@ -53,8 +53,23 @@ export const query = `
 `
 
 export function readOption(argv, name, fallback) {
-  const index = argv.indexOf(name)
-  return index === -1 ? fallback : argv[index + 1] || fallback
+  const prefix = `${name}=`
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i]
+    if (arg.startsWith(prefix)) {
+      const inlineValue = arg.slice(prefix.length)
+      if (!inlineValue) throw new Error(`Missing value for ${name}.`)
+      return inlineValue
+    }
+    if (arg === name) {
+      const next = argv[i + 1]
+      if (next === undefined || next === '' || next.startsWith('--')) {
+        throw new Error(`Missing value for ${name}.`)
+      }
+      return next
+    }
+  }
+  return fallback
 }
 
 export function failedChecks(contexts = []) {
@@ -109,7 +124,14 @@ export function collectPulls(runGraphql, author) {
 
   for (;;) {
     const raw = runGraphql(cursor)
-    const search = JSON.parse(raw).data.search
+    const parsed = JSON.parse(raw)
+    const search = parsed?.data?.search
+    if (!search) {
+      const detail = Array.isArray(parsed?.errors) && parsed.errors.length > 0
+        ? parsed.errors.map((err) => err?.message || String(err)).join('; ')
+        : 'GraphQL response did not include data.search.'
+      throw new Error(detail)
+    }
     for (const pr of (search.nodes ?? []).filter(Boolean)) {
       const key = pr.url || `${pr.repository?.nameWithOwner}#${pr.number}`
       if (seen.has(key)) continue

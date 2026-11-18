@@ -1,3 +1,5 @@
+import { parseWinningPullUrl } from './pull-url.ts'
+
 export type MergeState = 'BEHIND' | 'BLOCKED' | 'CLEAN' | 'UNSTABLE' | 'DIRTY' | 'UNKNOWN' | 'HAS_HOOKS'
 export type Mergeable = boolean | 'MERGEABLE' | 'CONFLICTING' | 'UNKNOWN' | null
 export type PullRequest = {
@@ -81,9 +83,10 @@ export function formatTime(value: string): string {
 
 export function commandFor(action: PendingAction, winningUrl: string, execute = false): string {
   const target = action.pr.url
+  const canonicalWinner = parseWinningPullUrl(winningUrl)?.url ?? winningUrl.trim()
   const base =
     action.kind === 'update-branch'
       ? `npm run pr:action -- update-branch ${target}`
-      : `npm run pr:action -- close-as-dupe ${target} ${winningUrl}`
+      : `npm run pr:action -- close-as-dupe ${target} ${canonicalWinner}`
   return execute ? `${base} --execute` : base
 }

@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { PAGE_SIZE, collectPulls, failedChecks, mapPull, orgAllowlist, parsePageSize, run } from './fetch-live-prs.mjs'
+import { PAGE_SIZE, collectPulls, failedChecks, mapPull, orgAllowlist, parsePageSize, readOption, run } from './fetch-live-prs.mjs'
 
 function page(nodes, hasNextPage, endCursor) {
   return JSON.stringify({
@@ -113,4 +113,27 @@ test('parsePageSize defaults to PAGE_SIZE and rejects out-of-range values', () =
   assert.throws(() => parsePageSize('101'), /Invalid --page-size/)
   assert.throws(() => parsePageSize('12.5'), /Invalid --page-size/)
   assert.throws(() => parsePageSize('abc'), /Invalid --page-size/)
+})
+
+test('readOption supports inline --flag=value and rejects missing option values', () => {
+  assert.equal(readOption(['node', 'script', '--author=octocat'], '--author', 'default'), 'octocat')
+  assert.equal(readOption(['node', 'script', '--page-size=15'], '--page-size', undefined), '15')
+  assert.equal(readOption(['node', 'script'], '--author', 'default'), 'default')
+  assert.throws(() => readOption(['node', 'script', '--output'], '--output', 'out.json'), /Missing value for --output/)
+  assert.throws(
+    () => readOption(['node', 'script', '--output', '--author', 'octocat'], '--output', 'out.json'),
+    /Missing value for --output/,
+  )
+  assert.throws(() => readOption(['node', 'script', '--author='], '--author', 'default'), /Missing value for --author/)
+})
+
+test('collectPulls surfaces GraphQL errors when data.search is absent', () => {
+  assert.throws(
+    () => collectPulls(() => JSON.stringify({ errors: [{ message: 'API rate limit exceeded' }] }), 'mangeshraut712'),
+    /API rate limit exceeded/,
+  )
+  assert.throws(
+    () => collectPulls(() => JSON.stringify({ data: {} }), 'mangeshraut712'),
+    /did not include data\.search/,
+  )
 })

@@ -9,38 +9,21 @@ import { execFileSync } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { fleetDeskConfig, isAllowlistedRepo } from '../src/config.ts'
 import { shouldSkipPullRequest } from '../src/skip-pr.js'
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url))
 const defaultOutput = resolve(scriptDirectory, '../public/fixtures/live-prs.json')
 
-export const PAGE_SIZE = 100
+export const PAGE_SIZE = 25
 
-export const orgAllowlist = new Set([
-  'apple',
-  'meta',
-  'facebook',
-  'anthropics',
-  'openai',
-  'netflix',
-  'microsoft',
-  'teslamotors',
-  'spacex',
-  'xai-org',
-  'samsung',
-  'lg',
-  'walmartlabs',
-  'jpmorganchase',
-  'amazon',
-  'aws',
-  'awslabs',
-  'adobe',
-  'nvidia',
-])
+export const orgAllowlist = new Set(
+  fleetDeskConfig.organizationAllowlist.flatMap(({ slugs }) => slugs),
+)
 
 export const query = `
-  query FleetDesk($searchQuery: String!, $cursor: String) {
-    search(query: $searchQuery, type: ISSUE, first: 100, after: $cursor) {
+  query FleetDesk($searchQuery: String!, $cursor: String, $pageSize: Int = 25) {
+    search(query: $searchQuery, type: ISSUE, first: $pageSize, after: $cursor) {
       pageInfo { hasNextPage endCursor }
       nodes {
         ... on PullRequest {
@@ -111,7 +94,7 @@ export function mapPull(pr, author) {
     failingChecks: failedChecks(pr.statusCheckRollup?.contexts?.nodes),
     labels: pr.labels.nodes.map((label) => label.name),
     updatedAt: pr.updatedAt,
-    orgAllowlisted: orgAllowlist.has(pr.repository.owner.login.toLowerCase()),
+    orgAllowlisted: isAllowlistedRepo(pr.repository.nameWithOwner),
   }
 }
 
@@ -142,7 +125,7 @@ export function collectPulls(runGraphql, author) {
   return prs
 }
 
-export function defaultGraphqlRunner(author) {
+export function defaultGraphqlRunner(author, pageSize = PAGE_SIZE) {
   return (cursor) => {
     const args = [
       'api',
@@ -151,6 +134,8 @@ export function defaultGraphqlRunner(author) {
       `query=${query}`,
       '-f',
       `searchQuery=is:pr is:open author:${author} archived:false`,
+      '-F',
+      `pageSize=${pageSize}`,
     ]
     if (cursor) {
       args.push('-f', `cursor=${cursor}`)
@@ -159,10 +144,20 @@ export function defaultGraphqlRunner(author) {
   }
 }
 
+export function parsePageSize(raw, fallback = PAGE_SIZE) {
+  if (raw === undefined || raw === null || raw === '') return fallback
+  const parsed = Number(raw)
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 100) {
+    throw new Error(`Invalid --page-size "${raw}". Expected an integer between 1 and 100.`)
+  }
+  return parsed
+}
+
 export function run(argv = process.argv, runGraphql) {
   const author = readOption(argv, '--author', 'mangeshraut712')
   const output = resolve(readOption(argv, '--output', defaultOutput))
-  const prs = collectPulls(runGraphql ?? defaultGraphqlRunner(author), author)
+  const pageSize = parsePageSize(readOption(argv, '--page-size', undefined))
+  const prs = collectPulls(runGraphql ?? defaultGraphqlRunner(author, pageSize), author)
   mkdirSync(dirname(output), { recursive: true })
   writeFileSync(output, `${JSON.stringify(prs, null, 2)}\n`)
   return { output, count: prs.length }

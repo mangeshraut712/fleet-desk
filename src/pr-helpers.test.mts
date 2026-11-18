@@ -109,6 +109,10 @@ test('commandFor formats update-branch and close-as-dupe commands', () => {
     commandFor(dupeAction, winnerUrl, true),
     'npm run pr:action -- close-as-dupe https://github.com/org/repo/pull/42 https://github.com/org/repo/pull/10 --execute'
   )
+  assert.equal(
+    commandFor(dupeAction, 'https://www.github.com/org/repo/pull/010/files?tab=files', false),
+    'npm run pr:action -- close-as-dupe https://github.com/org/repo/pull/42 https://github.com/org/repo/pull/10'
+  )
 })
 
 test('filters correctly match corresponding pull requests', () => {

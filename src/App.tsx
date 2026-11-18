@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { shouldSkipPullRequest } from './config.ts'
-import { isWinningPullUrl } from './pull-url.ts'
+import { isWinningPullUrl, isWinningPullUrlForTarget } from './pull-url.ts'
 import {
   filters,
   isPullRequest,
@@ -63,7 +63,7 @@ function App() {
   const visible = useMemo(() => activeFilters.length === 0 ? prs : prs.filter((pr) => activeFilters.some((id) => filters.find((filter) => filter.id === id)?.matches(pr))), [activeFilters, prs])
   const counts = useMemo(() => Object.fromEntries(filters.map((filter) => [filter.id, prs.filter(filter.matches).length])) as Record<FilterId, number>, [prs])
   const command = pending ? commandFor(pending, winningUrl.trim(), !dryRun) : ''
-  const duplicateUrlValid = isWinningPullUrl(winningUrl)
+  const duplicateUrlValid = pending?.kind === 'close-as-dupe' ? isWinningPullUrlForTarget(winningUrl, pending.pr) : isWinningPullUrl(winningUrl)
 
   function chooseMode(next: SourceMode) { setMode(next); if (next === 'fixture') setDryRun(true) }
   function toggleFilter(id: FilterId) { setActiveFilters((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]) }

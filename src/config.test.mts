@@ -14,6 +14,9 @@ test('isAllowlistedRepo identifies allowlisted company slugs', () => {
   assert.equal(isAllowlistedRepo('salesforce/zana'), true)
   assert.equal(isAllowlistedRepo('google/adk-go'), true)
   assert.equal(isAllowlistedRepo('google-gemini/cookbook'), true)
+  assert.equal(isAllowlistedRepo('intel/dokimi'), true)
+  assert.equal(isAllowlistedRepo('ibm/javacore-analyser'), true)
+  assert.equal(isAllowlistedRepo('carbon-design-system/carbon'), true)
 })
 
 test('isAllowlistedRepo handles casing and whitespace', () => {
@@ -38,6 +41,9 @@ test('getOrganizationForRepo returns canonical organization name', () => {
   assert.equal(getOrganizationForRepo('salesforce/zana'), 'Salesforce')
   assert.equal(getOrganizationForRepo('google/adk-go'), 'Google')
   assert.equal(getOrganizationForRepo('google-gemini/cookbook'), 'Google')
+  assert.equal(getOrganizationForRepo('intel/dokimi'), 'Intel')
+  assert.equal(getOrganizationForRepo('ibm/javacore-analyser'), 'IBM')
+  assert.equal(getOrganizationForRepo('carbon-design-system/carbon'), 'IBM')
   assert.equal(getOrganizationForRepo('unknown/project'), null)
   assert.equal(getOrganizationForRepo(null), null)
   assert.equal(getOrganizationForRepo(''), null)

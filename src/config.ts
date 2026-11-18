@@ -19,6 +19,8 @@ export const fleetDeskConfig = {
     { name: "NVIDIA", slugs: ["nvidia"] },
     { name: "Salesforce", slugs: ["salesforce"] },
     { name: "Google", slugs: ["google", "google-gemini"] },
+    { name: "Intel", slugs: ["intel"] },
+    { name: "IBM", slugs: ["ibm", "carbon-design-system"] },
   ],
   skipRules: {
     openaiCreatePrWhenCollaboratorBlocked: true,

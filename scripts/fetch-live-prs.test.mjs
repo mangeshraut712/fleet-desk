@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { collectPulls, run } from './fetch-live-prs.mjs'
+import { PAGE_SIZE, collectPulls, failedChecks, mapPull, orgAllowlist, parsePageSize, run } from './fetch-live-prs.mjs'
 
 function page(nodes, hasNextPage, endCursor) {
   return JSON.stringify({
@@ -74,4 +74,43 @@ test('collectPulls drops a collaborator-blocked OpenAI CreatePR and a pyrefly va
   const kept = pr(9, 'microsoft/vscode')
   const prs = collectPulls(() => page([blocked, vanity, kept], false, null), 'mangeshraut712')
   assert.deepEqual(prs.map((item) => item.number), [9])
+})
+
+test('mapPull shares organization allowlist with src/config.ts', () => {
+  for (const repo of [
+    'google/adk-go',
+    'google-gemini/cookbook',
+    'salesforce/zana',
+    'intel/dokimi',
+    'ibm/javacore-analyser',
+    'carbon-design-system/carbon',
+    'awslabs/stickler',
+  ]) {
+    const mapped = mapPull(pr(42, repo), 'mangeshraut712')
+    assert.equal(mapped.orgAllowlisted, true, `${repo} should be allowlisted`)
+  }
+  assert.equal(mapPull(pr(43, 'unaffiliated/example'), 'mangeshraut712').orgAllowlisted, false)
+  assert.equal(orgAllowlist.has('google'), true)
+  assert.equal(orgAllowlist.has('salesforce'), true)
+})
+
+test('failedChecks extracts failing CheckRun and StatusContext entries without duplicates', () => {
+  const contexts = [
+    { __typename: 'CheckRun', name: 'unit-tests', conclusion: 'FAILURE' },
+    { __typename: 'CheckRun', name: 'unit-tests', conclusion: 'TIMED_OUT' },
+    { __typename: 'CheckRun', name: 'lint', conclusion: 'SUCCESS' },
+    { __typename: 'StatusContext', context: 'cla/google', state: 'FAILURE' },
+    { __typename: 'StatusContext', context: 'codecov', state: 'SUCCESS' },
+  ]
+  assert.deepEqual(failedChecks(contexts), ['unit-tests', 'cla/google'])
+})
+
+test('parsePageSize defaults to PAGE_SIZE and rejects out-of-range values', () => {
+  assert.equal(parsePageSize(undefined), PAGE_SIZE)
+  assert.equal(parsePageSize(''), PAGE_SIZE)
+  assert.equal(parsePageSize('50'), 50)
+  assert.throws(() => parsePageSize('0'), /Invalid --page-size/)
+  assert.throws(() => parsePageSize('101'), /Invalid --page-size/)
+  assert.throws(() => parsePageSize('12.5'), /Invalid --page-size/)
+  assert.throws(() => parsePageSize('abc'), /Invalid --page-size/)
 })

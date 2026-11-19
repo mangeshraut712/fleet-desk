@@ -149,7 +149,7 @@ test('preserves comment pull request dry runs', () => {
   const result = run('comment', 'https://github.com/example/project/pull/12', 'LGTM! Great work.')
   assert.equal(result.status, 0)
   assert.match(result.stdout, /DRY RUN/)
-  assert.match(result.stdout, /gh pr comment 12 --repo example\/project --body "LGTM! Great work\."/)
+  assert.match(result.stdout, /gh pr comment 12 --repo example\/project --body 'LGTM! Great work\.'/)
 })
 
 test('rejects self-duplicate before execution with gh unavailable', () => {
@@ -193,5 +193,11 @@ test('treats a non-trailing --execute as comment text, not a switch', () => {
   assert.equal(result.status, 0)
   assert.match(result.stdout, /DRY RUN/)
   assert.doesNotMatch(result.stdout, /Executing/)
-  assert.match(result.stdout, /--body "please --execute the review"/)
+  assert.match(result.stdout, /--body 'please --execute the review'/)
+})
+
+test('single-quotes dry-run arguments so a copied command cannot expand them', () => {
+  const result = run('comment', 'https://github.com/example/project/pull/12', "it's $(id) `whoami`")
+  assert.equal(result.status, 0)
+  assert.ok(result.stdout.includes("--body 'it'\\''s $(id) `whoami`'"), result.stdout)
 })

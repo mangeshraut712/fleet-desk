@@ -68,8 +68,16 @@ function parsePullUrl(value) {
   }
 }
 
+// The dry run is meant to be copied into a shell, so quote anything that is
+// not a plain word. Double quotes (JSON.stringify) still expand $(...) and
+// backticks; single quotes do not.
+function shellQuote(part) {
+  if (/^[A-Za-z0-9_./:@%+=,-]+$/.test(part)) return part
+  return `'${part.replaceAll("'", `'\\''`)}'`
+}
+
 function display(args) {
-  return `gh ${args.map((part) => (part.includes(' ') ? JSON.stringify(part) : part)).join(' ')}`
+  return `gh ${args.map(shellQuote).join(' ')}`
 }
 
 const input = process.argv.slice(2)

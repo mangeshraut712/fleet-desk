@@ -73,8 +73,11 @@ function display(args) {
 }
 
 const input = process.argv.slice(2)
-const shouldExecute = input.includes('--execute')
-const args = input.filter((part) => part !== '--execute')
+// Only a trailing --execute counts. A comment body is joined from every
+// remaining argument, so an unquoted "--execute" word inside it must stay
+// text and must not switch the run out of dry-run mode.
+const shouldExecute = input.at(-1) === '--execute'
+const args = shouldExecute ? input.slice(0, -1) : input
 
 if (args.length === 0 || args.includes('--help') || args.includes('-h')) usage()
 

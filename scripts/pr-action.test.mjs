@@ -187,3 +187,11 @@ test('preserves normal owner and repository punctuation', () => {
   assert.equal(result.status, 0)
   assert.match(result.stdout, /gh pr update-branch 12 --repo example-org\/project\.name_2/)
 })
+
+test('treats a non-trailing --execute as comment text, not a switch', () => {
+  const result = run('comment', 'https://github.com/example/project/pull/12', 'please', '--execute', 'the', 'review')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.doesNotMatch(result.stdout, /Executing/)
+  assert.match(result.stdout, /--body "please --execute the review"/)
+})

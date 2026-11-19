@@ -11,7 +11,7 @@ export function shouldSkipPullRequest(pr, rules = {
   const labels = rawLabels.map((label) => String(label).toLowerCase())
   const hasLabel = (label) => labels.includes(label)
 
-  const isOpenAiCreatePr = repo.startsWith("openai/") && /create\s*-?\s*pr/.test(title)
+  const isOpenAiCreatePr = repo.startsWith("openai/") && /\bcreate\s*-?\s*prs?\b/.test(title)
   if (effectiveRules.openaiCreatePrWhenCollaboratorBlocked && isOpenAiCreatePr && hasLabel("collaborator-blocked")) {
     return true
   }

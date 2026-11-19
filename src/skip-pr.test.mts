@@ -19,6 +19,13 @@ test("skips an OpenAI CreatePR that is collaborator-blocked", () => {
   assert.equal(shouldSkipPullRequest({ ...openaiBlocked, title: "Create PR for tools" }), true)
 })
 
+test("does not treat words that merely contain create-pr as CreatePR", () => {
+  for (const title of ["Recreate PR: restore the sync workflow", "Create pricing table", "create-pr: add tool"]) {
+    const expected = title.startsWith("create-pr")
+    assert.equal(shouldSkipPullRequest({ ...openaiBlocked, title }), expected, title)
+  }
+})
+
 test("keeps an OpenAI CreatePR that is not collaborator-blocked", () => {
   assert.equal(shouldSkipPullRequest({ ...openaiBlocked, labels: ["needs-review"] }), false)
 })

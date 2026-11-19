@@ -53,6 +53,9 @@ function parsePullUrl(value) {
     // URL.pathname preserves escapes, but gh may decode them as repository aliases.
     parts[0].includes('%') ||
     parts[1].includes('%') ||
+    // GitHub owner and repository names only use letters, digits, '.', '_' and '-'.
+    !/^[A-Za-z0-9_.-]+$/.test(parts[0]) ||
+    !/^[A-Za-z0-9_.-]+$/.test(parts[1]) ||
     parts[2] !== 'pull' ||
     !Number.isSafeInteger(number) ||
     number < 1

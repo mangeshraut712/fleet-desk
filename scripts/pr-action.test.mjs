@@ -201,3 +201,11 @@ test('single-quotes dry-run arguments so a copied command cannot expand them', (
   assert.equal(result.status, 0)
   assert.ok(result.stdout.includes("--body 'it'\\''s $(id) `whoami`'"), result.stdout)
 })
+
+for (const url of ['https://github.com/$(id)/project/pull/12', 'https://github.com/example/pro;ject/pull/12']) {
+  test(`rejects shell characters in owner or repository: ${url}`, () => {
+    const result = run('view', url)
+    assert.equal(result.status, 1)
+    assert.equal(result.stdout, '')
+  })
+}

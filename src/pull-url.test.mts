@@ -56,3 +56,17 @@ test('isWinningPullUrlForTarget rejects self-duplicates across aliases and accep
   assert.equal(isWinningPullUrlForTarget('https://github.com/example/project/pull/13', target), true)
   assert.equal(isWinningPullUrlForTarget('https://github.com/other/project/pull/12', target), true)
 })
+
+for (const url of [
+  'https://github.com/$(id)/project/pull/12',
+  'https://github.com/example/pro;ject/pull/12',
+  'https://github.com/exa*mple/project/pull/12',
+]) {
+  test(`rejects owner or repository characters GitHub does not allow: ${url}`, () => {
+    assert.equal(parseWinningPullUrl(url), null)
+  })
+}
+
+test('accepts dots, underscores and dashes in repository names', () => {
+  assert.equal(parseWinningPullUrl('https://github.com/my-org/my_repo.js/pull/3')?.repo, 'my-org/my_repo.js')
+})

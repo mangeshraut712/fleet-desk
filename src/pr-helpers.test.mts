@@ -28,6 +28,12 @@ const basePr: PullRequest = {
   orgAllowlisted: true,
 }
 
+test('isPullRequest rejects a url that is not a GitHub pull request', () => {
+  for (const url of ['javascript:alert(1)', 'https://github.com/a/b/pull/1; rm -rf ~', 'http://github.com/a/b/pull/1']) {
+    assert.equal(isPullRequest({ ...basePr, url }), false, url)
+  }
+})
+
 test('isPullRequest validates valid object', () => {
   assert.equal(isPullRequest(basePr), true)
 })

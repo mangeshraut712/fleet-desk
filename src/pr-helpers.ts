@@ -38,6 +38,9 @@ export function isPullRequest(value: unknown): value is PullRequest {
     typeof pr.title === 'string' &&
     typeof pr.repo === 'string' &&
     typeof pr.url === 'string' &&
+    // The URL becomes a link href and part of a copied shell command, so only
+    // accept a canonical https://github.com/<owner>/<repo>/pull/<n> URL.
+    parseWinningPullUrl(pr.url) !== null &&
     // The cards call mergeStateStatus.toLowerCase(), so a row without it
     // would pass here and then crash the render.
     typeof pr.mergeStateStatus === 'string' &&

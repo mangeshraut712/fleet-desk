@@ -145,3 +145,12 @@ test('filters correctly match corresponding pull requests', () => {
   assert.equal(readyFilter.matches({ ...basePr, mergeStateStatus: 'BEHIND', reviewDecision: 'APPROVED' }), false)
   assert.equal(readyFilter.matches({ ...basePr, mergeStateStatus: 'CLEAN', reviewDecision: null }), false)
 })
+
+test('isPullRequest rejects rows the cards cannot render', () => {
+  const { mergeStateStatus: _state, ...withoutState } = basePr
+  assert.equal(isPullRequest(withoutState), false)
+  assert.equal(isPullRequest({ ...basePr, mergeStateStatus: 7 }), false)
+  const { reviewDecision: _review, ...withoutReview } = basePr
+  assert.equal(isPullRequest(withoutReview), false)
+  assert.equal(isPullRequest({ ...basePr, reviewDecision: null }), true)
+})

@@ -38,6 +38,10 @@ export function isPullRequest(value: unknown): value is PullRequest {
     typeof pr.title === 'string' &&
     typeof pr.repo === 'string' &&
     typeof pr.url === 'string' &&
+    // The cards call mergeStateStatus.toLowerCase(), so a row without it
+    // would pass here and then crash the render.
+    typeof pr.mergeStateStatus === 'string' &&
+    (typeof pr.reviewDecision === 'string' || pr.reviewDecision === null) &&
     Array.isArray(pr.failingChecks) &&
     Array.isArray(pr.labels)
   )

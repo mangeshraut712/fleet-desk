@@ -90,7 +90,9 @@ const input = process.argv.slice(2)
 const shouldExecute = input.at(-1) === '--execute'
 const args = shouldExecute ? input.slice(0, -1) : input
 
-if (args.length === 0 || args.includes('--help') || args.includes('-h')) usage()
+// Words after the URL of a comment are its body, so "-h" there is text.
+const helpArgs = args[0] === 'comment' ? args.slice(0, 2) : args
+if (args.length === 0 || helpArgs.includes('--help') || helpArgs.includes('-h')) usage()
 
 try {
   const [action, ...urls] = args

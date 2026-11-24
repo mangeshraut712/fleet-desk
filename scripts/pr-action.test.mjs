@@ -196,6 +196,13 @@ test('treats a non-trailing --execute as comment text, not a switch', () => {
   assert.match(result.stdout, /--body 'please --execute the review'/)
 })
 
+test('treats -h and --help inside a comment body as text, not a help request', () => {
+  const result = run('comment', 'https://github.com/example/project/pull/12', 'try', '--help', 'or', '-h')
+  assert.equal(result.status, 0)
+  assert.match(result.stdout, /DRY RUN/)
+  assert.match(result.stdout, /--body 'try --help or -h'/)
+})
+
 test('single-quotes dry-run arguments so a copied command cannot expand them', () => {
   const result = run('comment', 'https://github.com/example/project/pull/12', "it's $(id) `whoami`")
   assert.equal(result.status, 0)

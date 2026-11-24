@@ -30,8 +30,11 @@ gh auth login
 npm run fetch:live
 ```
 
-`GITHUB_TOKEN` also works when `gh` is installed. The exporter makes one
-read-only GraphQL request and writes only the local live-data file. It discovers
+`GITHUB_TOKEN` also works when `gh` is installed. The exporter makes read-only
+GraphQL requests, one per page of search results (`--page-size`, default 25),
+and writes only the local live-data file. It imports `src/config.ts` directly,
+so it needs a Node release that strips TypeScript types by default (22.18+ or
+23.6+; CI uses 24). It discovers
 open PRs matching `author:mangeshraut712` that the current GitHub credential can
 see. Use a different author or output file if needed:
 

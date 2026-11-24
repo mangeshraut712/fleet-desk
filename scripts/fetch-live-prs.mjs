@@ -38,7 +38,10 @@ export const query = `
           labels(first: 30) { nodes { name } }
           updatedAt
           statusCheckRollup {
+            state
             contexts(first: 100) {
+              totalCount
+              pageInfo { hasNextPage }
               nodes {
                 __typename
                 ... on CheckRun { name status conclusion }
@@ -96,6 +99,27 @@ export function failedChecks(contexts = []) {
   return [...failed]
 }
 
+/**
+ * contexts(first: 100) is GitHub's cap, so a PR with more checks can have its
+ * failures outside the page that was read. When the rollup says the PR failed
+ * but no failing check was seen, report that instead of showing it as green.
+ */
+export function rollupFailingChecks(rollup) {
+  const contexts = rollup?.contexts
+  const nodes = contexts?.nodes ?? []
+  const failing = failedChecks(nodes)
+  if (
+    failing.length === 0 &&
+    contexts?.pageInfo?.hasNextPage &&
+    ['ERROR', 'FAILURE'].includes(rollup?.state)
+  ) {
+    failing.push(
+      `check rollup ${rollup.state} (read ${nodes.length} of ${contexts.totalCount ?? 'more'} checks)`,
+    )
+  }
+  return failing
+}
+
 export function mapPull(pr, author) {
   return {
     number: pr.number,
@@ -106,7 +130,7 @@ export function mapPull(pr, author) {
     mergeable: pr.mergeable ?? 'UNKNOWN',
     mergeStateStatus: pr.mergeStateStatus ?? 'UNKNOWN',
     reviewDecision: pr.reviewDecision ?? 'PENDING',
-    failingChecks: failedChecks(pr.statusCheckRollup?.contexts?.nodes),
+    failingChecks: rollupFailingChecks(pr.statusCheckRollup),
     labels: pr.labels.nodes.map((label) => label.name),
     updatedAt: pr.updatedAt,
     orgAllowlisted: isAllowlistedRepo(pr.repository.nameWithOwner),

@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { test } from 'node:test'
-import { PAGE_SIZE, collectPulls, failedChecks, mapPull, orgAllowlist, parsePageSize, readOption, run } from './fetch-live-prs.mjs'
+import { PAGE_SIZE, collectPulls, failedChecks, mapPull, orgAllowlist, parsePageSize, readOption, rollupFailingChecks, run } from './fetch-live-prs.mjs'
 
 function page(nodes, hasNextPage, endCursor) {
   return JSON.stringify({
@@ -136,4 +136,24 @@ test('collectPulls surfaces GraphQL errors when data.search is absent', () => {
     () => collectPulls(() => JSON.stringify({ data: {} }), 'mangeshraut712'),
     /did not include data\.search/,
   )
+})
+
+test('rollupFailingChecks flags a failed rollup whose failing check is past the first 100 contexts', () => {
+  const passing = Array.from({ length: 100 }, (_, i) => ({ __typename: 'CheckRun', name: `job-${i}`, status: 'COMPLETED', conclusion: 'SUCCESS' }))
+  const rollup = { state: 'FAILURE', contexts: { totalCount: 140, pageInfo: { hasNextPage: true }, nodes: passing } }
+  assert.deepEqual(rollupFailingChecks(rollup), ['check rollup FAILURE (read 100 of 140 checks)'])
+})
+
+test('rollupFailingChecks keeps named failures and does not invent one when every check was read', () => {
+  const failing = { __typename: 'CheckRun', name: 'unit-tests', status: 'COMPLETED', conclusion: 'FAILURE' }
+  assert.deepEqual(
+    rollupFailingChecks({ state: 'FAILURE', contexts: { totalCount: 140, pageInfo: { hasNextPage: true }, nodes: [failing] } }),
+    ['unit-tests'],
+  )
+  assert.deepEqual(
+    rollupFailingChecks({ state: 'FAILURE', contexts: { totalCount: 0, pageInfo: { hasNextPage: false }, nodes: [] } }),
+    [],
+  )
+  assert.deepEqual(rollupFailingChecks({ state: 'SUCCESS', contexts: { totalCount: 140, pageInfo: { hasNextPage: true }, nodes: [] } }), [])
+  assert.deepEqual(rollupFailingChecks(null), [])
 })

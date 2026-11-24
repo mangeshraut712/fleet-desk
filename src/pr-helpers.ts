@@ -89,7 +89,8 @@ export function formatTime(value: string): string {
 }
 
 export function commandFor(action: PendingAction, winningUrl: string, execute = false): string {
-  const target = action.pr.url
+  // isPullRequest accepts URLs with a query or fragment, which must not reach the copied shell command.
+  const target = parseWinningPullUrl(action.pr.url)?.url ?? action.pr.url
   const canonicalWinner = parseWinningPullUrl(winningUrl)?.url ?? winningUrl.trim()
   const base =
     action.kind === 'update-branch'

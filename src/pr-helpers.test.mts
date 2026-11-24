@@ -121,6 +121,15 @@ test('commandFor formats update-branch and close-as-dupe commands', () => {
   )
 })
 
+test('commandFor drops query and fragment from the target PR URL', () => {
+  const pr = { ...basePr, url: 'https://github.com/org/repo/pull/42?x=$(id)#`whoami`' }
+  assert.equal(isPullRequest(pr), true)
+  assert.equal(
+    commandFor({ kind: 'update-branch', pr, stage: 'review' }, '', false),
+    'npm run pr:action -- update-branch https://github.com/org/repo/pull/42'
+  )
+})
+
 test('filters correctly match corresponding pull requests', () => {
   const behindFilter = filters.find((f) => f.id === 'behind')!
   const ciRedFilter = filters.find((f) => f.id === 'ci-red')!

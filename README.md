@@ -48,9 +48,9 @@ and leaves the checked-in fixture unchanged.
 ## Actions
 
 The board presents update-branch and close-as-duplicate as **dry runs** by
-default. Selecting an action records the exact `gh` command it would use. The
-included action bridge has the same default and has an explicit `--execute`
-gate:
+default. Selecting an action records the exact `npm run pr:action` command
+it would use; that bridge is what calls `gh`. It has the same dry-run default
+and an explicit `--execute` gate:
 
 ```sh
 npm run pr:action -- update-branch https://github.com/OWNER/REPO/pull/123
